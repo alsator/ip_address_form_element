@@ -8,28 +8,51 @@
  * Implements hook_element_info().
  */
 function ip_address_form_element_element_info() {
-  return array(
-    'ip4_address_field' => array(
-      '#input' => true,
-      '#process' => array('ajax_process_form'),
-      '#validate' => array('ip4_address_field_validate'),
-      '#theme' => 'ip4_address_field',
-      '#theme_wrappers' => array('form_element'),
-      '#step' => 1,
-      '#min' => 0,
-      '#max' => 255,
-    ),
-    'ip4_address_range_field' => array(
-      '#input' => true,
-      '#process' => array('ajax_process_form'),
-      '#element_validate' => array('ip4_address_range_field_validate'),
-      '#theme' => 'ip4_address_range_field',
-      '#theme_wrappers' => array('form_element'),
-      '#step' => 1,
-      '#min' => 0,
-      '#max' => 255,
-    ),
-  );
+	
+	return array(
+		'ipv4_address_field' => array(
+			'#input' => true,
+			'#process' => array('ipv4_address_field_process'),
+			'#validate' => array('ipv4_address_field_validate'),
+			'#theme' => 'ipv4_address_field',
+			'#theme_wrappers' => array('form_element'),
+			'#step' => 1,
+			'#min' => 0,
+			'#max' => 255,
+		),
+		'ipv4_address_range_field' => array(
+			'#input' => true,
+			'#process' => array('ajax_process_form'),
+			'#element_validate' => array('ipv4_address_range_field_validate'),
+			'#theme' => 'ipv4_address_range_field',
+			'#theme_wrappers' => array('form_element'),
+			'#step' => 1,
+			'#min' => 0,
+			'#max' => 255,
+		),
+	);
+}
+
+
+
+function ipv4_address_field_process($element, &$form_state) {
+	
+	$element['ip'] = array(
+		'#attributes' => array('class' => array('ipv4')/*, 'title' => t('')*/),
+		'#type' => 'textfield',
+		'#id'=>'ipv4',
+		'#size' => 15,
+		'#maxlength' => 15,
+		'#title' => t('ipv4 Address'),
+		'#default_value' => NULL,
+		'#attached' => array(
+			'js' => array(
+				drupal_get_path('module', 'ip_address_form_element') . '/js/ip.js',
+			),
+		),
+	);
+	
+	return $element;
 }
 
 
@@ -39,131 +62,138 @@ function ip_address_form_element_element_info() {
  *
  * Note that #required is validated by _form_validate() already.
  */
-function ip4_address_field_validate(&$element, &$form_state) {
-
-  dpm($element);
-  $ip4 = '';
-  for($i = 1; $i <= 4; $i++) {
-    $ip4 .= $form_state['input']['site_pages_access_rules'][1]['ip' . $i];
-  }
-  $form_state['values']['site_pages_access_rules'][1]['ip'] = $ip4;
-  $form_state['input']['site_pages_access_rules'][1]['ip4'] = $ip4;
-
-  $element['#value'] = $ip4;
-
-  $value = $element['#value'];
-  if($value === '') {
-    return;
-  }
-
-  $name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
-
-  // Ensure the input is numeric.
-  if(!is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $name)));
-
-    return;
-  }
-
-  // Ensure that the input is greater than the #min property, if set.
-  if(isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('%name must be higher or equal to %min.', array(
-      '%name' => $name,
-      '%min' => $element['#min']
-    )));
-  }
-
-  // Ensure that the input is less than the #max property, if set.
-  if(isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('%name must be below or equal to %max.', array(
-      '%name' => $name,
-      '%max' => $element['#max']
-    )));
-  }
-
-  if(isset($element['#step']) && strtolower($element['#step']) != 'any') {
-    // Check that the input is an allowed multiple of #step (offset by #min if
-    // #min is set).
-    $offset = isset($element['#min']) ? $element['#min'] : 0.0;
-
-    if(!elements_valid_number_step($value, $element['#step'], $offset)) {
-      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
-    }
-  }
+function ipv4_address_field_validate(&$element, &$form_state) {
+	
+	dpm($element);
+	$ipv4 = '';
+	for($i = 1; $i <= 4; $i++) {
+		$ipv4 .= $form_state['input']['site_pages_access_rules'][1]['ip' . $i];
+	}
+	$form_state['values']['site_pages_access_rules'][1]['ip'] = $ipv4;
+	$form_state['input']['site_pages_access_rules'][1]['ipv4'] = $ipv4;
+	
+	$element['#value'] = $ipv4;
+	
+	$value = $element['#value'];
+	if($value === '') {
+		return;
+	}
+	
+	$name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
+	
+	// Ensure the input is numeric.
+	if(!is_numeric($value)) {
+		form_error($element, t('%name must be a number.', array('%name' => $name)));
+		
+		return;
+	}
+	
+	// Ensure that the input is greater than the #min property, if set.
+	if(isset($element['#min']) && $value < $element['#min']) {
+		form_error($element, t('%name must be higher or equal to %min.', array(
+			'%name' => $name,
+			'%min' => $element['#min']
+		)));
+	}
+	
+	// Ensure that the input is less than the #max property, if set.
+	if(isset($element['#max']) && $value > $element['#max']) {
+		form_error($element, t('%name must be below or equal to %max.', array(
+			'%name' => $name,
+			'%max' => $element['#max']
+		)));
+	}
+	
+	if(isset($element['#step']) && strtolower($element['#step']) != 'any') {
+		// Check that the input is an allowed multiple of #step (offset by #min if
+		// #min is set).
+		$offset = isset($element['#min']) ? $element['#min'] : 0.0;
+		
+		if(!elements_valid_number_step($value, $element['#step'], $offset)) {
+			form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+		}
+	}
 }
 
 
 
-function ip4_address_range_field_validate(&$element, &$form_state) {
-  $value = $element['#value'];
-  if($value === '') {
-    return;
-  }
-
-  $name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
-
-  // Ensure the input is numeric.
-  if(!is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $name)));
-
-    return;
-  }
-
-  // Ensure that the input is greater than the #min property, if set.
-  if(isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('%name must be higher or equal to %min.', array(
-      '%name' => $name,
-      '%min' => $element['#min']
-    )));
-  }
-
-  // Ensure that the input is less than the #max property, if set.
-  if(isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('%name must be below or equal to %max.', array(
-      '%name' => $name,
-      '%max' => $element['#max']
-    )));
-  }
-
-  if(isset($element['#step']) && strtolower($element['#step']) != 'any') {
-    // Check that the input is an allowed multiple of #step (offset by #min if
-    // #min is set).
-    $offset = isset($element['#min']) ? $element['#min'] : 0.0;
-
-    if(!elements_valid_number_step($value, $element['#step'], $offset)) {
-      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
-    }
-  }
-
-  foreach($form_state['input']['site_pages_access_rules'] as $key => $value) {
-    $ip4 = [];
-    for($i = 1; $i <= 4; $i++) {
-      $ip4[] = $form_state['input']['site_pages_access_rules'][$key]['ip' . $i];
-    }
-    $ip4 = implode('.', $ip4);
-    $form_state['values']['site_pages_access_rules'][$key]['ip'] = $ip4;
-    $form_state['input']['site_pages_access_rules'][$key]['ip'] = $ip4;
-  }
+function ipv4_address_range_field_validate(&$element, &$form_state) {
+	
+	$value = $element['#value'];
+	if($value === '') {
+		return;
+	}
+	
+	$name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
+	
+	// Ensure the input is numeric.
+	if(!is_numeric($value)) {
+		form_error($element, t('%name must be a number.', array('%name' => $name)));
+		
+		return;
+	}
+	
+	// Ensure that the input is greater than the #min property, if set.
+	if(isset($element['#min']) && $value < $element['#min']) {
+		form_error($element, t('%name must be higher or equal to %min.', array(
+			'%name' => $name,
+			'%min' => $element['#min']
+		)));
+	}
+	
+	// Ensure that the input is less than the #max property, if set.
+	if(isset($element['#max']) && $value > $element['#max']) {
+		form_error($element, t('%name must be below or equal to %max.', array(
+			'%name' => $name,
+			'%max' => $element['#max']
+		)));
+	}
+	
+	if(isset($element['#step']) && strtolower($element['#step']) != 'any') {
+		// Check that the input is an allowed multiple of #step (offset by #min if
+		// #min is set).
+		$offset = isset($element['#min']) ? $element['#min'] : 0.0;
+		
+		if(!elements_valid_number_step($value, $element['#step'], $offset)) {
+			form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+		}
+	}
+	
+	foreach($form_state['input']['site_pages_access_rules'] as $key => $value) {
+		$ipv4 = [];
+		for($i = 1; $i <= 4; $i++) {
+			$ipv4[] = $form_state['input']['site_pages_access_rules'][$key]['ip' . $i];
+		}
+		$ipv4 = implode('.', $ipv4);
+		$form_state['values']['site_pages_access_rules'][$key]['ip'] = $ipv4;
+		$form_state['input']['site_pages_access_rules'][$key]['ip'] = $ipv4;
+	}
 }
 
-function ip4_address_range_field_process(&$element, &$form_state){
-  dpm($element);
+
+
+function ipv4_address_range_field_process(&$element, &$form_state) {
+	
+	dpm($element);
 }
+
+
 
 /**
  * Implements hook_theme().
  */
 function ip_address_form_element_theme() {
-  return array(
-    'ip4_address_field' => array(
-      'arguments' => array('element' => null),
-      'render element' => 'element',
-    ),
-    'ip4_address_range_field' => array(
-      'arguments' => array('element' => null),
-      'render element' => 'element',
-    ),
-  );
+	
+	return array(
+//		'ipv4_address_field' => array(
+//			'arguments' => array('element' => null),
+//			'render element' => 'element',
+//		),
+		'ipv4_address_range_field' => array(
+			'arguments' => array('element' => null),
+			'render element' => 'element',
+		),
+	);
 }
 
 
@@ -180,34 +210,31 @@ function ip_address_form_element_theme() {
  * @ingroup themeable
  */
 function theme_ip4_address_field($variables) {
-  $element = $variables['element'];
-  $element['#attributes']['type'] = 'text';
-  $element['#attributes']['size'] = 3;
-  $element['#attributes']['maxlength'] = 3;
-  element_set_attributes($element, array('value'));
-  _form_set_class($element, array('form-text', 'form-ip4-adreess'));
-
-  $output = '
-  <input id="ip1" name="site_pages_access_rules[1][ip1]"' . drupal_attributes($element['#attributes']) . ' />.
-  <input id="ip2" name="site_pages_access_rules[1][ip2]"' . drupal_attributes($element['#attributes']) . ' />.
-  <input id="ip3" name="site_pages_access_rules[1][ip3]"' . drupal_attributes($element['#attributes']) . ' />.
-  <input id="ip4" name="site_pages_access_rules[1][ip4]"' . drupal_attributes($element['#attributes']) . ' />
-  ';
-
-  return $output;
+	
+	$element = $variables['element'];
+	$element['#attributes']['type'] = 'text';
+	$element['#attributes']['size'] = 3;
+	$element['#attributes']['maxlength'] = 3;
+	element_set_attributes($element, array('id', 'name', 'value'));
+	_form_set_class($element, array('form-text', 'form-ip4-adreess'));
+	
+	$output = '<input' . drupal_attributes($element['#attributes']) . ' />';
+	
+	return $output;
 }
 
 
 
 function theme_ip4_address_range_field($variables) {
-  $element = $variables['element'];
-  $element['#attributes']['type'] = 'text';
-  $element['#attributes']['size'] = 3;
-  $element['#attributes']['maxlength'] = 3;
-  element_set_attributes($element, array('value'));
-  _form_set_class($element, array('form-text', 'form-ip4-adreess-range'));
-
-  $output = '
+	
+	$element = $variables['element'];
+	$element['#attributes']['type'] = 'text';
+	$element['#attributes']['size'] = 3;
+	$element['#attributes']['maxlength'] = 3;
+	element_set_attributes($element, array('value'));
+	_form_set_class($element, array('form-text', 'form-ip4-adreess-range'));
+	
+	$output = '
   <input id="ip11" name="site_pages_access_rules[1][ip1]"' . drupal_attributes($element['#attributes']) . ' />.
   <input id="ip12" name="site_pages_access_rules[1][ip2]"' . drupal_attributes($element['#attributes']) . ' />.
   <input id="ip13" name="site_pages_access_rules[1][ip3]"' . drupal_attributes($element['#attributes']) . ' />.
@@ -218,6 +245,6 @@ function theme_ip4_address_range_field($variables) {
   <input id="ip23" name="site_pages_access_rules[2][ip3]"' . drupal_attributes($element['#attributes']) . ' />.
   <input id="ip24" name="site_pages_access_rules[2][ip4]"' . drupal_attributes($element['#attributes']) . ' />
   ';
-
-  return $output;
+	
+	return $output;
 }
