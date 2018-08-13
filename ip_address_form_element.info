@@ -3,3 +3,4 @@ description = A description of what your module does.
 core = 7.x
 
 scripts[] = js/jquery.input-ip-address-control-1.0.min.js
+scripts[] = js/ip.js
