@@ -21,6 +21,17 @@ function ip_address_form_element_element_info() {
       '#element_validate' => array('ipv4_address_range_form_element_validate'),
       '#theme_wrappers' => array('fieldset'),
     ),
+    'ipv6_address_field' => array(
+      '#input' => true,
+      '#process' => array('ipv6_address_form_element_process'),
+      '#theme_wrappers' => array('fieldset'),
+    ),
+    'ipv6_address_range_field' => array(
+      '#input' => true,
+      '#process' => array('ipv6_address_range_form_element_process'),
+      '#element_validate' => array('ipv6_address_range_form_element_validate'),
+      '#theme_wrappers' => array('fieldset'),
+    ),
   );
 }
 
@@ -53,6 +64,42 @@ function ipv4_address_range_form_element_validate(&$element, &$form_state) {
   foreach($start as $key => $mask_element) {
     if($start[$key] > $end[$key]) {
       form_error($element, t('Start address must be smaller rather end address.'));
+
+      return;
+    }
+  }
+}
+
+
+
+function ipv6_address_form_element_process($element, &$form_state) {
+
+  $element['ip_address'] = array(
+    '#attributes' => array('class' => array('ipv6')),
+    '#type' => 'textfield',
+    '#default_value' => null,
+  );
+
+  return $element;
+}
+
+
+
+function ipv6_address_range_form_element_validate(&$element, &$form_state) {
+
+  $where = &$form_state['input'];
+
+  foreach($element['#parents'] as $key => $value) {
+    $where = &$where[$value];
+  }
+
+  $start = explode(':', $where['ip_range_start']);
+  $end = explode(':', $where['ip_range_end']);
+
+  foreach($start as $key => $mask_element) {
+    if(hexdec($start[$key]) > hexdec($end[$key])) {
+      form_error($element, t('Start address must be smaller rather end address.'));
+
       return;
     }
   }
@@ -72,6 +119,28 @@ function ipv4_address_range_form_element_process(&$element, &$form_state) {
   $element['ip_range_end'] = array(
     '#title' => t('End'),
     '#attributes' => array('class' => array('ipv4')),
+    '#type' => 'textfield',
+    '#default_value' => null,
+  );
+
+  return $element;
+
+}
+
+
+
+function ipv6_address_range_form_element_process(&$element, &$form_state) {
+
+  $element['ip_range_start'] = array(
+    '#title' => t('Start'),
+    '#attributes' => array('class' => array('ipv6')),
+    '#type' => 'textfield',
+    '#default_value' => null,
+  );
+
+  $element['ip_range_end'] = array(
+    '#title' => t('End'),
+    '#attributes' => array('class' => array('ipv6')),
     '#type' => 'textfield',
     '#default_value' => null,
   );
