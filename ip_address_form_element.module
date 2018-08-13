@@ -52,21 +52,16 @@ function ipv4_address_form_element_process($element, &$form_state) {
 
 function ipv4_address_range_form_element_validate(&$element, &$form_state) {
 
-  $where = &$form_state['input'];
+  $ip = &$form_state['input'];
 
   foreach($element['#parents'] as $key => $value) {
-    $where = &$where[$value];
+    $ip = &$ip[$value];
   }
 
-  $start = explode('.', $where['ip_range_start']);
-  $end = explode('.', $where['ip_range_end']);
+  if(ip2long_($ip['ip_range_start']) > ip2long($ip['ip_range_end'])) {
+    form_error($element, t('Start address must be smaller rather end address.'));
 
-  foreach($start as $key => $mask_element) {
-    if($start[$key] > $end[$key]) {
-      form_error($element, t('Start address must be smaller rather end address.'));
-
-      return;
-    }
+    return;
   }
 }
 
@@ -87,21 +82,16 @@ function ipv6_address_form_element_process($element, &$form_state) {
 
 function ipv6_address_range_form_element_validate(&$element, &$form_state) {
 
-  $where = &$form_state['input'];
+  $ip = &$form_state['input'];
 
   foreach($element['#parents'] as $key => $value) {
-    $where = &$where[$value];
+    $ip = &$ip[$value];
   }
 
-  $start = explode(':', $where['ip_range_start']);
-  $end = explode(':', $where['ip_range_end']);
+  if(inet_pton($ip['ip_range_start']) > inet_pton($ip['ip_range_end'])) {
+    form_error($element, t('Start address must be smaller rather end address.'));
 
-  foreach($start as $key => $mask_element) {
-    if(hexdec($start[$key]) > hexdec($end[$key])) {
-      form_error($element, t('Start address must be smaller rather end address.'));
-
-      return;
-    }
+    return;
   }
 }
 
