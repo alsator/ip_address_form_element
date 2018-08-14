@@ -1,7 +1,7 @@
 name = Ip Address Form Element
 description = A description of what your module does.
 core = 7.x
-version = 7.x-1.0-dev
+version = 7.x-1.0
 
 scripts[] = js/jquery.input-ip-address-control-1.0.min.js
 scripts[] = js/ip.js
