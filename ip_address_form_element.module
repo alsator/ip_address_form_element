@@ -58,7 +58,7 @@ function ipv4_address_range_form_element_validate(&$element, &$form_state) {
     $ip = &$ip[$value];
   }
 
-  if(ip2long_($ip['ip_range_start']) > ip2long($ip['ip_range_end'])) {
+  if(ip2long($ip['ip_range_start']) > ip2long($ip['ip_range_end'])) {
     form_error($element, t('Start address must be smaller rather end address.'));
 
     return;
